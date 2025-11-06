@@ -1,34 +1,12 @@
 import { SearchBar } from "@/components/SearchBar";
-import { Button } from "@/components/ui/button";
+import { Navigation } from "@/components/Navigation";
 import { MapPin, Coffee, Heart } from "lucide-react";
-import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-cafe.jpg";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50 shadow-soft">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <Coffee className="h-7 w-7 text-primary" />
-            <span className="text-2xl font-bold text-foreground">Café Haven</span>
-          </Link>
-          <nav className="flex items-center gap-4">
-            <Link to="/search">
-              <Button variant="ghost" className="hover:bg-secondary/70">
-                Explore
-              </Button>
-            </Link>
-            <Link to="/profile">
-              <Button variant="ghost" className="hover:bg-secondary/70">
-                <Heart className="h-4 w-4 mr-2" />
-                Favorites
-              </Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">

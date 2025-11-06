@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { cafes, Cafe } from "@/lib/mock-data";
+import { cafes } from "@/lib/mock-data";
 import { CafeCard } from "@/components/CafeCard";
 import { FilterPanel } from "@/components/FilterPanel";
 import { SearchBar } from "@/components/SearchBar";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Coffee, Heart } from "lucide-react";
+import { Coffee } from "lucide-react";
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -80,23 +81,7 @@ const Search = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50 shadow-soft">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <Coffee className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold text-foreground hidden sm:inline">Café Haven</span>
-          </Link>
-          <div className="flex-1 max-w-2xl">
-            <SearchBar defaultValue={queryParam} variant="compact" />
-          </div>
-          <Link to="/profile">
-            <Button variant="ghost" size="icon" className="shrink-0">
-              <Heart className="h-5 w-5" />
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <Navigation />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">

@@ -1,24 +1,43 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { cafes, reviews } from "@/lib/mock-data";
+import { useAuth } from "@/contexts/AuthContext";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { ArrowLeft, Heart, MapPin, Phone, Clock, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
+interface Comment {
+  id: string;
+  cafeId: number;
+  username: string;
+  rating: number;
+  text: string;
+  date: string;
+}
+
 const CafeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const cafe = cafes.find((c) => c.id === Number(id));
   const cafeReviews = reviews.filter((r) => r.cafeId === Number(id));
 
   const [isFavorite, setIsFavorite] = useState(false);
+  const [userComments, setUserComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState({ rating: 5, text: "" });
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
     setIsFavorite(favorites.includes(Number(id)));
+    
+    const savedComments = JSON.parse(localStorage.getItem("cafe_comments") || "[]");
+    setUserComments(savedComments.filter((c: Comment) => c.cafeId === Number(id)));
   }, [id]);
 
   if (!cafe) {
@@ -44,6 +63,35 @@ const CafeDetail = () => {
     toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
   };
 
+  const handleSubmitComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      toast.error("Please login to add a comment");
+      navigate("/auth");
+      return;
+    }
+    if (!newComment.text.trim()) {
+      toast.error("Please write a comment");
+      return;
+    }
+
+    const comment: Comment = {
+      id: Date.now().toString(),
+      cafeId: cafe.id,
+      username: user!.username,
+      rating: newComment.rating,
+      text: newComment.text,
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    };
+
+    const allComments = JSON.parse(localStorage.getItem("cafe_comments") || "[]");
+    const updatedComments = [...allComments, comment];
+    localStorage.setItem("cafe_comments", JSON.stringify(updatedComments));
+    setUserComments([...userComments, comment]);
+    setNewComment({ rating: 5, text: "" });
+    toast.success("Comment added successfully!");
+  };
+
   const ratingDistribution = [78, 32, 10, 2, 1];
   const avgCategories = cafeReviews.length > 0 
     ? {
@@ -54,21 +102,11 @@ const CafeDetail = () => {
       }
     : { drinks: 4.8, food: 4.5, service: 4.6, atmosphere: 4.9 };
 
+  const allReviews = [...cafeReviews, ...userComments];
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50 shadow-soft">
-        <div className="container mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="hover:bg-secondary/70"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-        </div>
-      </header>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8 space-y-6">
@@ -181,9 +219,51 @@ const CafeDetail = () => {
             {/* Reviews Section */}
             <Card className="shadow-card border-border/50">
               <CardContent className="p-6 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-semibold text-foreground">Reviews</h2>
-                  <Button variant="outline" size="sm">Write Review</Button>
+                <div>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6">Reviews & Comments</h2>
+                  
+                  {/* Add Comment Form */}
+                  {isAuthenticated ? (
+                    <form onSubmit={handleSubmitComment} className="space-y-4 p-4 bg-secondary/20 rounded-xl mb-6">
+                      <div className="space-y-2">
+                        <Label>Your Rating</Label>
+                        <div className="flex gap-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setNewComment({ ...newComment, rating: star })}
+                              className="transition-transform hover:scale-110"
+                            >
+                              <Star
+                                className={`h-6 w-6 ${
+                                  star <= newComment.rating
+                                    ? "fill-yellow-500 text-yellow-500"
+                                    : "text-muted-foreground"
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="comment-text">Your Comment</Label>
+                        <Textarea
+                          id="comment-text"
+                          placeholder="Share your experience at this café..."
+                          value={newComment.text}
+                          onChange={(e) => setNewComment({ ...newComment, text: e.target.value })}
+                          rows={3}
+                        />
+                      </div>
+                      <Button type="submit" className="w-full">Post Comment</Button>
+                    </form>
+                  ) : (
+                    <div className="p-4 bg-secondary/20 rounded-xl mb-6 text-center">
+                      <p className="text-muted-foreground mb-3">Login to share your experience</p>
+                      <Button onClick={() => navigate("/auth")} variant="outline">Login</Button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Rating Distribution */}
@@ -222,19 +302,29 @@ const CafeDetail = () => {
                   ))}
                 </div>
 
-                {/* Individual Reviews */}
+                {/* Individual Reviews & Comments */}
                 <div className="space-y-4 pt-4 border-t border-border">
-                  {cafeReviews.map((review) => (
+                  {allReviews.map((review) => (
                     <div key={review.id} className="space-y-2">
                       <div className="flex items-start gap-3">
-                        <img
-                          src={review.userAvatar}
-                          alt={review.userName}
-                          className="h-10 w-10 rounded-full"
-                        />
+                        {"userAvatar" in review ? (
+                          <img
+                            src={review.userAvatar}
+                            alt={review.userName}
+                            className="h-10 w-10 rounded-full"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-sm font-semibold text-primary">
+                              {review.username.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <span className="font-medium">{review.userName}</span>
+                            <span className="font-medium">
+                              {"userName" in review ? review.userName : review.username}
+                            </span>
                             <span className="text-xs text-muted-foreground">{review.date}</span>
                           </div>
                           <div className="flex items-center gap-1 mt-1">
