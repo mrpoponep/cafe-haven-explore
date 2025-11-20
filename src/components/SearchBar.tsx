@@ -28,7 +28,7 @@ export const SearchBar = ({ defaultValue = "", variant = "hero" }: SearchBarProp
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Find cafés in Hai Bà Trưng, Hanoi..."
+          placeholder="ハノイのカフェを探す..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className={`pl-10 ${isHero ? "h-14 text-lg" : "h-12"} bg-card shadow-card border-border/50 focus-visible:ring-primary`}
@@ -39,7 +39,7 @@ export const SearchBar = ({ defaultValue = "", variant = "hero" }: SearchBarProp
         size={isHero ? "lg" : "default"}
         className={`${isHero ? "px-8" : "px-6"} bg-primary hover:bg-primary/90 text-primary-foreground shadow-card transition-all duration-300 hover:shadow-hover`}
       >
-        Search
+        検索
       </Button>
     </form>
   );

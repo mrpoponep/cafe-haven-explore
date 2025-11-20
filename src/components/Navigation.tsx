@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Coffee, Heart, LogOut, User } from "lucide-react";
+import { Coffee, Heart, LogOut, User, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ export const Navigation = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully");
+    toast.success("ログアウトしました");
   };
 
   return (
@@ -29,41 +29,49 @@ export const Navigation = () => {
         <nav className="flex items-center gap-4">
           <Link to="/search">
             <Button variant="ghost" className="hover:bg-secondary/70">
-              Explore
+              探索
             </Button>
           </Link>
           <Link to="/profile">
             <Button variant="ghost" className="hover:bg-secondary/70">
               <Heart className="h-4 w-4 mr-2" />
-              Favorites
+              お気に入り
             </Button>
           </Link>
           
           {isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <>
+              <Link to="/add-cafe">
                 <Button variant="outline" className="gap-2">
-                  <User className="h-4 w-4" />
-                  {user?.username}
+                  <Plus className="h-4 w-4" />
+                  カフェを追加
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="w-full cursor-pointer">
-                    <Heart className="h-4 w-4 mr-2" />
-                    My Favorites
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <User className="h-4 w-4" />
+                    {user?.username}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="w-full cursor-pointer">
+                      <Heart className="h-4 w-4 mr-2" />
+                      マイお気に入り
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    ログアウト
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           ) : (
             <Link to="/auth">
-              <Button>Login</Button>
+              <Button>ログイン</Button>
             </Link>
           )}
         </nav>

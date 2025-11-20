@@ -8,7 +8,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   login: (username: string, password: string) => void;
-  signup: (username: string, email: string, password: string) => void;
+  signup: (username: string, email: string, password: string, skipPreferences?: boolean) => boolean;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -31,10 +31,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("cafe_haven_user", JSON.stringify(userData));
   };
 
-  const signup = (username: string, email: string, _password: string) => {
+  const signup = (username: string, email: string, _password: string, skipPreferences = false) => {
     const userData = { username, email };
     setUser(userData);
     localStorage.setItem("cafe_haven_user", JSON.stringify(userData));
+    return skipPreferences;
   };
 
   const logout = () => {

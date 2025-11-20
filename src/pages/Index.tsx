@@ -24,12 +24,11 @@ const Index = () => {
         <div className="relative z-10 container mx-auto px-4 py-20 text-center space-y-8">
           <div className="space-y-4 max-w-3xl mx-auto">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground text-balance leading-tight">
-              Discover Your Perfect
-              <span className="block text-primary">Café Moment</span>
+              あなたにぴったりの
+              <span className="block text-primary">カフェを発見</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Find cozy cafés in Hanoi with great coffee, wifi, and atmosphere.
-              Your next favorite spot is just a search away.
+              ハノイで素敵なコーヒー、Wi-Fi、雰囲気のあるカフェを見つけよう
             </p>
           </div>
 
