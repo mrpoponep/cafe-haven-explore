@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { cafes, reviews } from "@/lib/mock-data";
+import { getAllCafes, reviews } from "@/lib/mock-data";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ const CafeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const cafes = getAllCafes();
   const cafe = cafes.find((c) => c.id === Number(id));
   const cafeReviews = reviews.filter((r) => r.cafeId === Number(id));
 

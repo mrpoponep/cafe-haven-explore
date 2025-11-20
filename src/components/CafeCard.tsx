@@ -97,7 +97,7 @@ export const CafeCard = ({ cafe }: CafeCardProps) => {
           </div>
           
           <p className="text-xs text-muted-foreground pt-1">
-            {cafe.reviews} reviews
+            {cafe.reviews} レビュー
           </p>
         </CardContent>
       </Card>

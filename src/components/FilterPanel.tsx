@@ -32,25 +32,25 @@ export const FilterPanel = ({
     <Card className="p-6 space-y-6 bg-card border-border/50 shadow-card sticky top-4">
       <div className="flex items-center gap-2 pb-2 border-b border-border">
         <Filter className="h-5 w-5 text-primary" />
-        <h2 className="font-semibold text-lg">Filters & Sort</h2>
+        <h2 className="font-semibold text-lg">フィルター & ソート</h2>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Sort By</Label>
+        <Label className="text-sm font-medium">並べ替え</Label>
         <Select value={sortBy} onValueChange={onSortChange}>
           <SelectTrigger className="bg-background">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="rating">Highest Rated</SelectItem>
-            <SelectItem value="distance">Closest</SelectItem>
-            <SelectItem value="price-low">Cheapest</SelectItem>
+            <SelectItem value="rating">評価が高い順</SelectItem>
+            <SelectItem value="distance">近い順</SelectItem>
+            <SelectItem value="price-low">安い順</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Café Type</Label>
+        <Label className="text-sm font-medium">カフェタイプ</Label>
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -59,7 +59,7 @@ export const FilterPanel = ({
               onCheckedChange={(checked) => onFilterChange("dogFriendly", checked as boolean)}
             />
             <Label htmlFor="dog" className="text-sm cursor-pointer">
-              🐕 Dog Café
+              🐕 ドッグカフェ
             </Label>
           </div>
           <div className="flex items-center space-x-2">
@@ -69,14 +69,14 @@ export const FilterPanel = ({
               onCheckedChange={(checked) => onFilterChange("catFriendly", checked as boolean)}
             />
             <Label htmlFor="cat" className="text-sm cursor-pointer">
-              🐱 Cat Café
+              🐱 キャットカフェ
             </Label>
           </div>
         </div>
       </div>
 
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Amenities</Label>
+        <Label className="text-sm font-medium">設備</Label>
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -95,7 +95,7 @@ export const FilterPanel = ({
               onCheckedChange={(checked) => onFilterChange("powerOutlets", checked as boolean)}
             />
             <Label htmlFor="power" className="text-sm cursor-pointer">
-              Power Outlets
+              電源コンセント
             </Label>
           </div>
           <div className="flex items-center space-x-2">
@@ -105,7 +105,7 @@ export const FilterPanel = ({
               onCheckedChange={(checked) => onFilterChange("outdoor", checked as boolean)}
             />
             <Label htmlFor="outdoor" className="text-sm cursor-pointer">
-              Outdoor Seating
+              屋外席
             </Label>
           </div>
         </div>

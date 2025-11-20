@@ -35,7 +35,13 @@ export interface Review {
   };
 }
 
-export const cafes: Cafe[] = [
+// Function to get all cafes including user-submitted ones
+export const getAllCafes = (): Cafe[] => {
+  const userCafes = JSON.parse(localStorage.getItem("user_cafes") || "[]");
+  return [...mockCafes, ...userCafes];
+};
+
+const mockCafes: Cafe[] = [
   {
     id: 1,
     name: "Highlands Coffee",
@@ -431,6 +437,8 @@ export const cafes: Cafe[] = [
     distance: 3.8,
   },
 ];
+
+export const cafes = mockCafes;
 
 export const reviews: Review[] = [
   {

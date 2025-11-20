@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { cafes } from "@/lib/mock-data";
+import { getAllCafes } from "@/lib/mock-data";
 import { CafeCard } from "@/components/CafeCard";
 import { FilterPanel } from "@/components/FilterPanel";
 import { SearchBar } from "@/components/SearchBar";
@@ -29,7 +29,8 @@ const Search = () => {
   };
 
   const filteredAndSortedCafes = () => {
-    let results = cafes.filter((cafe) => {
+    const allCafes = getAllCafes();
+    let results = allCafes.filter((cafe) => {
       // Text search
       if (queryParam) {
         const query = queryParam.toLowerCase();

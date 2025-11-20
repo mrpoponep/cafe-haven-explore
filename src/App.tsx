@@ -9,6 +9,8 @@ import Search from "./pages/Search";
 import CafeDetail from "./pages/CafeDetail";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import Preferences from "./pages/Preferences";
+import AddCafe from "./pages/AddCafe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
             <Route path="/cafe/:id" element={<CafeDetail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/preferences" element={<Preferences />} />
+            <Route path="/add-cafe" element={<AddCafe />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
