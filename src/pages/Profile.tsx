@@ -4,19 +4,68 @@ import { cafes } from "@/lib/mock-data";
 import { CafeCard } from "@/components/CafeCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Heart, PenSquare, Coffee } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Heart, PenSquare, Coffee, User, Settings } from "lucide-react";
+import { toast } from "sonner";
+import { UserPreferences } from "./Preferences";
 
 const Profile = () => {
   const [favorites, setFavorites] = useState<number[]>([]);
-  const [isLoggedIn] = useState(true); // Mock login state
+  const [isLoggedIn] = useState(true);
+  
+  // Profile state
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
+
+  // Preferences state
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    cafeTypes: [],
+    priceRange: [],
+    maxDistance: "5",
+    amenities: [],
+  });
 
   useEffect(() => {
     const savedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
     setFavorites(savedFavorites);
+    
+    const savedProfile = JSON.parse(localStorage.getItem("user_profile") || "{}");
+    if (savedProfile.name) setProfile(savedProfile);
+    
+    const savedPreferences = JSON.parse(localStorage.getItem("user_preferences") || "{}");
+    if (savedPreferences.cafeTypes) setPreferences(savedPreferences);
   }, []);
 
   const favoriteCafes = cafes.filter((cafe) => favorites.includes(cafe.id));
+
+  const toggleArrayPreference = (key: keyof UserPreferences, value: string) => {
+    setPreferences((prev) => {
+      const array = prev[key] as string[];
+      return {
+        ...prev,
+        [key]: array.includes(value)
+          ? array.filter((v) => v !== value)
+          : [...array, value],
+      };
+    });
+  };
+
+  const handleSaveProfile = () => {
+    localStorage.setItem("user_profile", JSON.stringify(profile));
+    toast.success("プロフィールを保存しました！");
+  };
+
+  const handleSavePreferences = () => {
+    localStorage.setItem("user_preferences", JSON.stringify(preferences));
+    toast.success("好みを保存しました！");
+  };
 
   // Mock user reviews
   const myReviews = [
@@ -25,14 +74,14 @@ const Profile = () => {
       cafeName: "Highlands Coffee",
       rating: 5,
       date: "2024-10-15",
-      text: "Love the vibe here! Great for working remotely with stable wifi and plenty of power outlets.",
+      text: "雰囲気が最高！安定したWi-Fiと電源コンセントがあり、リモートワークに最適です。",
     },
     {
       cafeId: 2,
       cafeName: "The Coffee House",
       rating: 5,
       date: "2024-10-20",
-      text: "Cat café with velvet sofas and killer matcha lattes. The cats are adorable!",
+      text: "ベルベットのソファと最高の抹茶ラテがあるキャットカフェ。猫たちがとても可愛い！",
     },
   ];
 
@@ -42,11 +91,11 @@ const Profile = () => {
         <Card className="max-w-md w-full mx-4">
           <CardContent className="p-8 text-center space-y-4">
             <Coffee className="h-16 w-16 text-primary mx-auto" />
-            <h2 className="text-2xl font-bold">Login Required</h2>
+            <h2 className="text-2xl font-bold">ログインが必要です</h2>
             <p className="text-muted-foreground">
-              Please log in to view your favorites and reviews
+              お気に入りとレビューを見るにはログインしてください
             </p>
-            <Button className="w-full">Log In</Button>
+            <Button className="w-full">ログイン</Button>
           </CardContent>
         </Card>
       </div>
@@ -61,26 +110,183 @@ const Profile = () => {
           <Link to="/">
             <Button variant="ghost" className="hover:bg-secondary/70">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              戻る
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold text-foreground">My Profile</h1>
+          <h1 className="text-2xl font-bold text-foreground">マイプロフィール</h1>
         </div>
       </header>
 
       {/* Profile Content */}
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="favorites" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 bg-secondary/50">
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4 bg-secondary/50">
+            <TabsTrigger value="profile" className="gap-2">
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">プロフィール</span>
+            </TabsTrigger>
+            <TabsTrigger value="preferences" className="gap-2">
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">好み</span>
+            </TabsTrigger>
             <TabsTrigger value="favorites" className="gap-2">
               <Heart className="h-4 w-4" />
-              Favorites
+              <span className="hidden sm:inline">お気に入り</span>
             </TabsTrigger>
             <TabsTrigger value="reviews" className="gap-2">
               <PenSquare className="h-4 w-4" />
-              My Reviews
+              <span className="hidden sm:inline">レビュー</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="mt-8">
+            <Card className="max-w-xl shadow-card border-border/50">
+              <CardHeader>
+                <CardTitle>プロフィール編集</CardTitle>
+                <CardDescription>あなたの情報を更新してください</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">お名前</Label>
+                  <Input
+                    id="name"
+                    value={profile.name}
+                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                    placeholder="山田太郎"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">メールアドレス</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={profile.email}
+                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                    placeholder="example@email.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">電話番号</Label>
+                  <Input
+                    id="phone"
+                    value={profile.phone}
+                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                    placeholder="090-1234-5678"
+                  />
+                </div>
+                <Button onClick={handleSaveProfile} className="w-full mt-4">
+                  プロフィールを保存
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Preferences Tab */}
+          <TabsContent value="preferences" className="mt-8">
+            <Card className="max-w-2xl shadow-card border-border/50">
+              <CardHeader>
+                <CardTitle>好みの設定</CardTitle>
+                <CardDescription>カフェ検索をカスタマイズしましょう</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Café Types */}
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">好きなカフェタイプ</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { value: "dog", label: "🐕 ドッグカフェ" },
+                      { value: "cat", label: "🐱 キャットカフェ" },
+                      { value: "work", label: "💼 仕事向け" },
+                      { value: "quiet", label: "🤫 静か" },
+                    ].map((type) => (
+                      <div key={type.value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`pref-type-${type.value}`}
+                          checked={preferences.cafeTypes.includes(type.value)}
+                          onCheckedChange={() => toggleArrayPreference("cafeTypes", type.value)}
+                        />
+                        <Label htmlFor={`pref-type-${type.value}`} className="cursor-pointer">
+                          {type.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price Range */}
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">価格帯</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { value: "cheap", label: "₫ < 100k" },
+                      { value: "moderate", label: "₫₫ 100-200k" },
+                      { value: "expensive", label: "₫₫₫ > 200k" },
+                    ].map((price) => (
+                      <div key={price.value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`pref-price-${price.value}`}
+                          checked={preferences.priceRange.includes(price.value)}
+                          onCheckedChange={() => toggleArrayPreference("priceRange", price.value)}
+                        />
+                        <Label htmlFor={`pref-price-${price.value}`} className="cursor-pointer">
+                          {price.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Max Distance */}
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">最大距離</Label>
+                  <Select
+                    value={preferences.maxDistance}
+                    onValueChange={(value) => setPreferences({ ...preferences, maxDistance: value })}
+                  >
+                    <SelectTrigger className="bg-background">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2">2 km</SelectItem>
+                      <SelectItem value="5">5 km</SelectItem>
+                      <SelectItem value="10">10 km</SelectItem>
+                      <SelectItem value="20">20 km</SelectItem>
+                      <SelectItem value="any">制限なし</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Amenities */}
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">設備の好み</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { value: "wifi", label: "📶 Wi-Fi" },
+                      { value: "outlets", label: "🔌 電源コンセント" },
+                      { value: "outdoor", label: "🌳 屋外席" },
+                      { value: "parking", label: "🚗 駐車場" },
+                    ].map((amenity) => (
+                      <div key={amenity.value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`pref-amenity-${amenity.value}`}
+                          checked={preferences.amenities.includes(amenity.value)}
+                          onCheckedChange={() => toggleArrayPreference("amenities", amenity.value)}
+                        />
+                        <Label htmlFor={`pref-amenity-${amenity.value}`} className="cursor-pointer">
+                          {amenity.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Button onClick={handleSavePreferences} className="w-full mt-4">
+                  好みを保存
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Favorites Tab */}
           <TabsContent value="favorites" className="mt-8">
@@ -88,10 +294,10 @@ const Profile = () => {
               <>
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-foreground">
-                    {favoriteCafes.length} Saved Café{favoriteCafes.length !== 1 ? "s" : ""}
+                    {favoriteCafes.length} 件のお気に入りカフェ
                   </h2>
                   <p className="text-muted-foreground text-sm mt-1">
-                    Your favorite spots in Hanoi
+                    ハノイでお気に入りのスポット
                   </p>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -104,15 +310,15 @@ const Profile = () => {
               <div className="text-center py-16">
                 <Heart className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
                 <h2 className="text-2xl font-semibold text-foreground mb-2">
-                  No favorites yet
+                  お気に入りがありません
                 </h2>
                 <p className="text-muted-foreground mb-6">
-                  Start exploring and save your favorite cafés!
+                  カフェを探して、お気に入りに保存しましょう！
                 </p>
                 <Link to="/search">
                   <Button>
                     <Coffee className="h-4 w-4 mr-2" />
-                    Discover Cafés
+                    カフェを探す
                   </Button>
                 </Link>
               </div>
@@ -125,10 +331,10 @@ const Profile = () => {
               <>
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-foreground">
-                    {myReviews.length} Review{myReviews.length !== 1 ? "s" : ""}
+                    {myReviews.length} 件のレビュー
                   </h2>
                   <p className="text-muted-foreground text-sm mt-1">
-                    Your café experiences shared
+                    あなたのカフェ体験をシェア
                   </p>
                 </div>
                 <div className="space-y-4 max-w-3xl">
@@ -153,10 +359,10 @@ const Profile = () => {
                         <p className="text-muted-foreground">{review.text}</p>
                         <div className="flex gap-2 mt-4">
                           <Button variant="outline" size="sm">
-                            Edit
+                            編集
                           </Button>
                           <Button variant="ghost" size="sm">
-                            Delete
+                            削除
                           </Button>
                         </div>
                       </CardContent>
@@ -168,15 +374,15 @@ const Profile = () => {
               <div className="text-center py-16">
                 <PenSquare className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
                 <h2 className="text-2xl font-semibold text-foreground mb-2">
-                  No reviews yet
+                  レビューがありません
                 </h2>
                 <p className="text-muted-foreground mb-6">
-                  Share your café experiences with the community!
+                  カフェ体験をコミュニティとシェアしましょう！
                 </p>
                 <Link to="/search">
                   <Button>
                     <Coffee className="h-4 w-4 mr-2" />
-                    Find Cafés to Review
+                    レビューするカフェを探す
                   </Button>
                 </Link>
               </div>
