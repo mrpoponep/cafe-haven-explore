@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Navigation } from "@/components/Navigation";
-import { Coffee, ArrowLeft } from "lucide-react";
+import { Coffee, ArrowLeft, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 
 const AddCafe = () => {
@@ -24,6 +25,42 @@ const AddCafe = () => {
     hours: "",
     tags: [] as string[],
   });
+  
+  const [photos, setPhotos] = useState<{
+    interior: string[];
+    menu: string[];
+    food: string[];
+  }>({
+    interior: [],
+    menu: [],
+    food: [],
+  });
+  
+  const interiorInputRef = useRef<HTMLInputElement>(null);
+  const menuInputRef = useRef<HTMLInputElement>(null);
+  const foodInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleImageUpload = (category: "interior" | "menu" | "food", files: FileList | null) => {
+    if (!files) return;
+    
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotos((prev) => ({
+          ...prev,
+          [category]: [...prev[category], reader.result as string],
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  
+  const removeImage = (category: "interior" | "menu" | "food", index: number) => {
+    setPhotos((prev) => ({
+      ...prev,
+      [category]: prev[category].filter((_, i) => i !== index),
+    }));
+  };
 
   const availableTags = [
     "Wi-Fi", "電源コンセント", "屋外席", "ドッグカフェ", "キャットカフェ",
@@ -68,9 +105,9 @@ const AddCafe = () => {
       phone: formData.phone,
       hours: formData.hours,
       photos: {
-        menu: ["https://source.unsplash.com/600x400/?coffee,menu"],
-        interior: ["https://source.unsplash.com/600x400/?cafe,interior"],
-        food: ["https://source.unsplash.com/600x400/?coffee,food"],
+        menu: photos.menu.length > 0 ? photos.menu : ["https://source.unsplash.com/600x400/?coffee,menu"],
+        interior: photos.interior.length > 0 ? photos.interior : ["https://source.unsplash.com/600x400/?cafe,interior"],
+        food: photos.food.length > 0 ? photos.food : ["https://source.unsplash.com/600x400/?coffee,food"],
       },
       distance: Math.random() * 10,
     };
@@ -218,6 +255,144 @@ const AddCafe = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Photo Upload Section */}
+              <div className="space-y-4">
+                <Label>写真を追加</Label>
+                <Tabs defaultValue="interior" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3 bg-secondary/50">
+                    <TabsTrigger value="interior">店内</TabsTrigger>
+                    <TabsTrigger value="menu">メニュー</TabsTrigger>
+                    <TabsTrigger value="food">料理と飲み物</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="interior" className="mt-4 space-y-4">
+                    <input
+                      type="file"
+                      ref={interiorInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => handleImageUpload("interior", e.target.files)}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => interiorInputRef.current?.click()}
+                      className="w-full gap-2"
+                    >
+                      <ImagePlus className="h-4 w-4" />
+                      店内写真を追加
+                    </Button>
+                    {photos.interior.length > 0 && (
+                      <div className="grid grid-cols-2 gap-3">
+                        {photos.interior.map((photo, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={photo}
+                              alt={`店内 ${idx + 1}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => removeImage("interior", idx)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="menu" className="mt-4 space-y-4">
+                    <input
+                      type="file"
+                      ref={menuInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => handleImageUpload("menu", e.target.files)}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => menuInputRef.current?.click()}
+                      className="w-full gap-2"
+                    >
+                      <ImagePlus className="h-4 w-4" />
+                      メニュー写真を追加
+                    </Button>
+                    {photos.menu.length > 0 && (
+                      <div className="grid grid-cols-2 gap-3">
+                        {photos.menu.map((photo, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={photo}
+                              alt={`メニュー ${idx + 1}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => removeImage("menu", idx)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="food" className="mt-4 space-y-4">
+                    <input
+                      type="file"
+                      ref={foodInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => handleImageUpload("food", e.target.files)}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => foodInputRef.current?.click()}
+                      className="w-full gap-2"
+                    >
+                      <ImagePlus className="h-4 w-4" />
+                      料理・飲み物写真を追加
+                    </Button>
+                    {photos.food.length > 0 && (
+                      <div className="grid grid-cols-2 gap-3">
+                        {photos.food.map((photo, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={photo}
+                              alt={`料理 ${idx + 1}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => removeImage("food", idx)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </div>
 
               <Button type="submit" className="w-full" size="lg">
