@@ -118,17 +118,41 @@ const CafeDetail = () => {
     toast.success("コメントを投稿しました！");
   };
 
-  const ratingDistribution = [78, 32, 10, 2, 1];
-  const avgCategories = cafeReviews.length > 0 
-    ? {
-        drinks: cafeReviews.reduce((sum, r) => sum + r.categories.drinks, 0) / cafeReviews.length,
-        food: cafeReviews.reduce((sum, r) => sum + r.categories.food, 0) / cafeReviews.length,
-        service: cafeReviews.reduce((sum, r) => sum + r.categories.service, 0) / cafeReviews.length,
-        atmosphere: cafeReviews.reduce((sum, r) => sum + r.categories.atmosphere, 0) / cafeReviews.length,
-      }
-    : { drinks: 4.8, food: 4.5, service: 4.6, atmosphere: 4.9 };
-
   const allReviews = [...cafeReviews, ...userComments];
+
+  // Calculate rating distribution from actual reviews
+  const ratingDistribution = [5, 4, 3, 2, 1].map(star => {
+    const mockCount = cafeReviews.filter(r => Math.round(r.rating) === star).length;
+    const userCount = userComments.filter(c => Math.round(c.rating) === star).length;
+    return mockCount + userCount;
+  });
+
+  // Calculate average categories from all reviews
+  const avgCategories = allReviews.length > 0 
+    ? {
+        drinks: allReviews.reduce((sum, r) => {
+          const drinkRating = 'categories' in r ? r.categories.drinks : r.drinkRating;
+          return sum + drinkRating;
+        }, 0) / allReviews.length,
+        food: allReviews.reduce((sum, r) => {
+          const foodRating = 'categories' in r ? r.categories.food : r.foodRating;
+          return sum + foodRating;
+        }, 0) / allReviews.length,
+        service: allReviews.reduce((sum, r) => {
+          const serviceRating = 'categories' in r ? r.categories.service : r.serviceRating;
+          return sum + serviceRating;
+        }, 0) / allReviews.length,
+        atmosphere: allReviews.reduce((sum, r) => {
+          const atmosphereRating = 'categories' in r ? r.categories.atmosphere : r.atmosphereRating;
+          return sum + atmosphereRating;
+        }, 0) / allReviews.length,
+      }
+    : { drinks: 0, food: 0, service: 0, atmosphere: 0 };
+
+  // Calculate overall average rating
+  const overallAvgRating = allReviews.length > 0
+    ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length
+    : cafe.rating;
 
   return (
     <div className="min-h-screen bg-background">
@@ -492,20 +516,40 @@ const CafeDetail = () => {
 
                 {/* Rating Distribution */}
                 <div className="space-y-2 pt-4">
-                  {[5, 4, 3, 2, 1].map((stars, idx) => (
-                    <div key={stars} className="flex items-center gap-3">
-                      <span className="text-sm w-16">★ {stars}</span>
-                      <div className="flex-1 bg-secondary rounded-full h-3 overflow-hidden">
-                        <div
-                          className="bg-primary h-full transition-all"
-                          style={{ width: `${(ratingDistribution[idx] / 123) * 100}%` }}
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-3xl font-bold text-primary">{overallAvgRating.toFixed(1)}</span>
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-4 w-4 ${
+                            star <= Math.round(overallAvgRating)
+                              ? "fill-yellow-500 text-yellow-500"
+                              : "text-muted-foreground"
+                          }`}
                         />
-                      </div>
-                      <span className="text-sm text-muted-foreground w-10 text-right">
-                        {ratingDistribution[idx]}
-                      </span>
+                      ))}
                     </div>
-                  ))}
+                    <span className="text-sm text-muted-foreground">({allReviews.length}件のレビュー)</span>
+                  </div>
+                  {[5, 4, 3, 2, 1].map((stars, idx) => {
+                    const totalReviews = ratingDistribution.reduce((a, b) => a + b, 0);
+                    const percentage = totalReviews > 0 ? (ratingDistribution[idx] / totalReviews) * 100 : 0;
+                    return (
+                      <div key={stars} className="flex items-center gap-3">
+                        <span className="text-sm w-16">★ {stars}</span>
+                        <div className="flex-1 bg-secondary rounded-full h-3 overflow-hidden">
+                          <div
+                            className="bg-primary h-full transition-all"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-muted-foreground w-10 text-right">
+                          {ratingDistribution[idx]}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Category Ratings with 1-10 scale */}
