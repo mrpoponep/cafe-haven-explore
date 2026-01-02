@@ -184,7 +184,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t border-border/50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© ２０２４ KissaGo. ハノイのカフェ好きのために、愛を込めて制作されました。</p>
+          <p>© 2025 KissaGo. ハノイのカフェ好きのために、愛を込めて制作されました。</p>
         </div>
       </footer>
     </div>
